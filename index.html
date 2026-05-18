@@ -376,12 +376,12 @@
 
     .photo-frame img {
       width: 100%;
-      height: 100%;
-      object-fit: cover;
+      height: auto;
+      object-fit: contain;
       display: block;
     }
     .photo-frame.tall img { max-height: 520px; object-position: top center; }
-    .photo-frame:not(.tall) img { max-height: 250px; }
+    .photo-frame:not(.tall) img { max-height: none; }
 
     /* gold corner accents */
     .photo-frame::before, .photo-frame::after {
