@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happy Birthday Adeola 🎂</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Cormorant+Garamond:wght@300;400;600&family=Space+Mono&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --gold: #D4AF37;
+      --gold-light: #F5E27A;
+      --dark: #0a0a0a;
+      --cream: #faf6ef;
+      --rose: #c9748a;
+    }
+
+    body {
+      background: var(--dark);
+      font-family: 'Cormorant Garamond', serif;
+      overflow-x: hidden;
+      cursor: default;
+    }
+
+    /* ───── CURTAIN SCREEN ───── */
+    #curtain-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #0a0a0a;
+      overflow: hidden;
+      transition: opacity 0.8s ease, visibility 0.8s ease;
+    }
+    #curtain-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    /* fabric panels */
+    .curtain-left, .curtain-right {
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 50%;
+      background: linear-gradient(135deg, #1a0a2e 0%, #2d0d4e 40%, #1a0a2e 100%);
+      transition: transform 1.2s cubic-bezier(0.76, 0, 0.24, 1);
+      z-index: 2;
+      overflow: hidden;
+    }
+    .curtain-left { left: 0; }
+    .curtain-right { right: 0; }
+
+    /* fabric folds */
+    .curtain-left::before, .curtain-left::after,
+    .curtain-right::before, .curtain-right::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 2px;
+      background: rgba(212, 175, 55, 0.15);
+    }
+    .curtain-left::before { left: 25%; }
+    .curtain-left::after  { left: 60%; }
+    .curtain-right::before { right: 25%; }
+    .curtain-right::after  { right: 60%; }
+
+    /* gold rail at top */
+    .curtain-rail {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 18px;
+      background: linear-gradient(90deg, #8B6914, #D4AF37, #F5E27A, #D4AF37, #8B6914);
+      z-index: 10;
+      box-shadow: 0 4px 20px rgba(212,175,55,0.5);
+    }
+
+    /* zipper track */
+    .zipper-track {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 18px;
+      bottom: 0;
+      width: 6px;
+      background: linear-gradient(180deg, #D4AF37 0%, #8B6914 100%);
+      z-index: 5;
+    }
+
+    /* zipper teeth */
+    .zipper-track::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -8px; right: -8px; bottom: 0;
+      background: repeating-linear-gradient(
+        180deg,
+        transparent 0px,
+        transparent 8px,
+        rgba(212,175,55,0.6) 8px,
+        rgba(212,175,55,0.6) 12px
+      );
+    }
+
+    /* zipper pull handle */
+    #zipper-pull {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 18px;
+      z-index: 20;
+      cursor: grab;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      user-select: none;
+      touch-action: none;
+      filter: drop-shadow(0 0 12px rgba(212,175,55,0.8));
+      transition: filter 0.3s;
+    }
+    #zipper-pull:hover { filter: drop-shadow(0 0 20px rgba(212,175,55,1)); }
+    #zipper-pull:active { cursor: grabbing; }
+
+    .pull-head {
+      width: 44px;
+      height: 28px;
+      background: linear-gradient(135deg, #F5E27A, #D4AF37, #8B6914);
+      border-radius: 6px;
+      border: 2px solid #F5E27A;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: #0a0a0a;
+      font-weight: bold;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    }
+
+    .pull-tab {
+      width: 24px;
+      height: 36px;
+      background: linear-gradient(180deg, #D4AF37, #8B6914);
+      border-radius: 4px;
+      margin-top: 2px;
+      border: 1px solid #F5E27A;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .pull-tab::after {
+      content: '';
+      width: 10px;
+      height: 10px;
+      border: 2px solid rgba(255,255,255,0.5);
+      border-radius: 50%;
+    }
+
+    /* unzipped gap */
+    #unzip-gap {
+      position: absolute;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 6px;
+      height: 0;
+      background: transparent;
+      z-index: 3;
+      transition: none;
+    }
+
+    /* hint text */
+    #hint {
+      position: absolute;
+      bottom: 15%;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(212,175,55,0.8);
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      z-index: 20;
+      white-space: nowrap;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    /* arrow indicator */
+    #arrow-indicator {
+      position: absolute;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: var(--gold);
+      font-size: 28px;
+      z-index: 20;
+      animation: bounce 1.2s ease-in-out infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(10px); }
+    }
+
+    /* open state */
+    .curtain-left.open  { transform: translateX(-100%); }
+    .curtain-right.open { transform: translateX(100%); }
+
+    /* ───── MAIN CONTENT ───── */
+    #main-content {
+      min-height: 100vh;
+      background: var(--dark);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* starfield */
+    .stars {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: white;
+      animation: twinkle var(--d) ease-in-out infinite;
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.2; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.4); }
+    }
+
+    /* gold particles */
+    .particle {
+      position: fixed;
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--gold);
+      pointer-events: none;
+      z-index: 1;
+      animation: float var(--d) ease-in-out infinite;
+    }
+    @keyframes float {
+      0% { transform: translateY(100vh) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-20px) rotate(720deg); opacity: 0; }
+    }
+
+    /* ───── HERO ───── */
+    .hero {
+      position: relative;
+      z-index: 2;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px 40px;
+      text-align: center;
+    }
+
+    .crown {
+      font-size: 56px;
+      animation: crownFloat 3s ease-in-out infinite;
+      margin-bottom: 10px;
+    }
+    @keyframes crownFloat {
+      0%, 100% { transform: translateY(0) rotate(-5deg); }
+      50% { transform: translateY(-12px) rotate(5deg); }
+    }
+
+    .gold-rule {
+      width: 200px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 20px auto;
+    }
+    .gold-rule.wide { width: 320px; }
+
+    .eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 6px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .main-name {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(56px, 14vw, 120px);
+      font-weight: 700;
+      background: linear-gradient(135deg, #8B6914 0%, #D4AF37 35%, #F5E27A 50%, #D4AF37 65%, #8B6914 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      letter-spacing: -2px;
+      text-shadow: none;
+      filter: drop-shadow(0 0 30px rgba(212,175,55,0.4));
+      animation: shimmer 3s linear infinite;
+      background-size: 200% auto;
+    }
+    @keyframes shimmer {
+      0% { background-position: 0% center; }
+      100% { background-position: 200% center; }
+    }
+
+    .birthday-text {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: clamp(22px, 5vw, 40px);
+      color: var(--rose);
+      margin-top: 8px;
+    }
+
+    /* ───── PHOTO GALLERY ───── */
+    .gallery-section {
+      position: relative;
+      z-index: 2;
+      padding: 40px 20px;
+    }
+
+    .section-label {
+      text-align: center;
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 5px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 30px;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 16px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .photo-frame {
+      position: relative;
+      border-radius: 4px;
+      overflow: hidden;
+      background: #111;
+      box-shadow:
+        0 0 0 1px rgba(212,175,55,0.3),
+        0 0 0 4px rgba(0,0,0,0.8),
+        0 0 0 5px rgba(212,175,55,0.15),
+        0 20px 60px rgba(0,0,0,0.6);
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+    .photo-frame:hover {
+      transform: translateY(-6px) scale(1.02);
+      box-shadow:
+        0 0 0 1px rgba(212,175,55,0.6),
+        0 0 0 4px rgba(0,0,0,0.8),
+        0 0 0 5px rgba(212,175,55,0.3),
+        0 30px 80px rgba(0,0,0,0.7),
+        0 0 40px rgba(212,175,55,0.15);
+    }
+
+    /* first photo spans both rows */
+    .photo-frame.tall {
+      grid-row: 1 / 3;
+    }
+
+    .photo-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .photo-frame.tall img { max-height: 520px; object-position: top center; }
+    .photo-frame:not(.tall) img { max-height: 250px; }
+
+    /* gold corner accents */
+    .photo-frame::before, .photo-frame::after {
+      content: '';
+      position: absolute;
+      width: 20px; height: 20px;
+      z-index: 2;
+      border-color: var(--gold);
+      border-style: solid;
+    }
+    .photo-frame::before {
+      top: 8px; left: 8px;
+      border-width: 2px 0 0 2px;
+    }
+    .photo-frame::after {
+      bottom: 8px; right: 8px;
+      border-width: 0 2px 2px 0;
+    }
+
+    /* ───── MESSAGE ───── */
+    .message-section {
+      position: relative;
+      z-index: 2;
+      max-width: 700px;
+      margin: 60px auto;
+      padding: 0 24px;
+      text-align: center;
+    }
+
+    .message-card {
+      background: linear-gradient(135deg, rgba(212,175,55,0.05) 0%, rgba(201,116,138,0.05) 100%);
+      border: 1px solid rgba(212,175,55,0.2);
+      border-radius: 4px;
+      padding: 50px 40px;
+      position: relative;
+    }
+    .message-card::before {
+      content: '\201C';
+      position: absolute;
+      top: -20px;
+      left: 40px;
+      font-family: 'Playfair Display', serif;
+      font-size: 100px;
+      color: var(--gold);
+      opacity: 0.3;
+      line-height: 1;
+    }
+
+    .message-text {
+      font-size: clamp(16px, 3vw, 22px);
+      font-weight: 300;
+      color: rgba(250,246,239,0.9);
+      line-height: 1.9;
+      letter-spacing: 0.3px;
+    }
+
+    .message-text em {
+      color: var(--gold-light);
+      font-style: italic;
+    }
+
+    .signature {
+      margin-top: 36px;
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 18px;
+      color: var(--rose);
+    }
+
+    /* ───── CODE EASTER EGG ───── */
+    .code-section {
+      position: relative;
+      z-index: 2;
+      max-width: 700px;
+      margin: 0 auto 60px;
+      padding: 0 24px;
+      text-align: center;
+    }
+
+    .code-block {
+      background: #0d1117;
+      border: 1px solid rgba(212,175,55,0.2);
+      border-radius: 8px;
+      padding: 28px 32px;
+      font-family: 'Space Mono', monospace;
+      text-align: left;
+      position: relative;
+      overflow: hidden;
+    }
+    .code-block::before {
+      content: 'Java • Just for you 💛';
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: rgba(212,175,55,0.5);
+    }
+
+    .code-line { display: block; margin: 2px 0; font-size: 13px; line-height: 1.8; }
+    .kw  { color: #c792ea; }
+    .cl  { color: #82aaff; }
+    .str { color: #c3e88d; }
+    .cm  { color: rgba(255,255,255,0.3); font-style: italic; }
+    .fn  { color: #ffcb6b; }
+    .num { color: #f78c6c; }
+
+    .code-caption {
+      margin-top: 14px;
+      font-size: 13px;
+      color: rgba(250,246,239,0.4);
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 1px;
+    }
+
+    /* ───── FOOTER ───── */
+    footer {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 40px 20px 60px;
+      border-top: 1px solid rgba(212,175,55,0.1);
+    }
+
+    .confetti-row {
+      font-size: 28px;
+      letter-spacing: 6px;
+      margin-bottom: 16px;
+      animation: dance 2s ease-in-out infinite;
+    }
+    @keyframes dance {
+      0%, 100% { transform: translateY(0); }
+      25% { transform: translateY(-4px); }
+      75% { transform: translateY(4px); }
+    }
+
+    .footer-text {
+      font-size: 13px;
+      color: rgba(250,246,239,0.25);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      font-family: 'Space Mono', monospace;
+    }
+
+    /* ───── REVEAL ANIMATION ───── */
+    .reveal-item {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .reveal-item.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* mobile */
+    @media (max-width: 520px) {
+      .gallery-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+      }
+      .photo-frame.tall { grid-row: auto; }
+      .photo-frame.tall img { max-height: 380px; }
+      .message-card { padding: 36px 24px; }
+      .code-block { padding: 20px 16px; font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════ CURTAIN SCREEN ═══════════ -->
+<div id="curtain-screen">
+  <div class="curtain-rail"></div>
+
+  <div class="curtain-left" id="curtainLeft">
+    <div style="position:absolute;inset:0;background:repeating-linear-gradient(180deg,rgba(255,255,255,0.02) 0px,rgba(255,255,255,0.02) 1px,transparent 1px,transparent 40px);"></div>
+  </div>
+  <div class="curtain-right" id="curtainRight">
+    <div style="position:absolute;inset:0;background:repeating-linear-gradient(180deg,rgba(255,255,255,0.02) 0px,rgba(255,255,255,0.02) 1px,transparent 1px,transparent 40px);"></div>
+  </div>
+
+  <div class="zipper-track"></div>
+
+  <div id="unzip-gap"></div>
+
+  <div id="zipper-pull">
+    <div class="pull-head">✦</div>
+    <div class="pull-tab"></div>
+  </div>
+
+  <div id="arrow-indicator">↓</div>
+
+  <div id="hint">Pull the zipper down</div>
+</div>
+
+<!-- ═══════════ MAIN CONTENT ═══════════ -->
+<div id="main-content">
+
+  <!-- Stars -->
+  <div class="stars" id="stars"></div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="crown reveal-item">👑</div>
+    <div class="eyebrow reveal-item" style="transition-delay:0.1s">The Universe Presents</div>
+    <div class="gold-rule reveal-item" style="transition-delay:0.15s"></div>
+    <h1 class="main-name reveal-item" style="transition-delay:0.2s">Adeola</h1>
+    <p class="birthday-text reveal-item" style="transition-delay:0.3s">Happy Birthday, Queen</p>
+    <div class="gold-rule wide reveal-item" style="transition-delay:0.35s"></div>
+  </section>
+
+  <!-- Gallery -->
+  <section class="gallery-section reveal-item" style="transition-delay:0.4s">
+    <p class="section-label">— Her Finest Moments —</p>
+    <div class="gallery-grid">
+
+      <!-- Photo 1 (tall / left) — replace src with your image path -->
+      <div class="photo-frame tall">
+        <img src="photo1.jpg" alt="Adeola" />
+      </div>
+
+      <!-- Photo 2 (top right) -->
+      <div class="photo-frame">
+        <img src="photo2.jpg" alt="Adeola" />
+      </div>
+
+      <!-- Photo 3 (bottom right) -->
+      <div class="photo-frame">
+        <img src="photo3.jpg" alt="Adeola" />
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Message -->
+  <section class="message-section reveal-item" style="transition-delay:0.5s">
+    <div class="message-card">
+      <p class="message-text">
+        To the one who walks into a room and <em>owns it without trying</em> —
+        today the whole world celebrates you, Adeola.
+        <br /><br />
+        You are already proof that <em>brilliance and beauty</em> belong in the same sentence.
+        And now you're out here learning Java too?
+        The world doesn't stand a chance. 💻✨
+        <br /><br />
+        May this new chapter of your life be as radiant as your smile,
+        as bold as your spirit, and <em>as full of joy as you deserve</em>.
+        Keep shining — the crown always looked good on you.
+      </p>
+      <div class="signature">With love, always 🌹</div>
+    </div>
+  </section>
+
+  <!-- Java Easter Egg -->
+  <section class="code-section reveal-item" style="transition-delay:0.6s">
+    <p class="section-label">— A little something for the Java Queen —</p>
+    <div class="code-block">
+      <span class="code-line cm">// This one's for you, Adeola 🎂</span>
+      <span class="code-line"><span class="kw">public class</span> <span class="cl">Birthday</span> {</span>
+      <span class="code-line">&nbsp;&nbsp;<span class="kw">public static void</span> <span class="fn">main</span>(String[] args) {</span>
+      <span class="code-line"></span>
+      <span class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">String</span> name = <span class="str">"Adeola"</span>;</span>
+      <span class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">int</span> joy = <span class="num">∞</span>;</span>
+      <span class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">boolean</span> isQueen = <span class="kw">true</span>;</span>
+      <span class="code-line"></span>
+      <span class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">if</span> (isQueen) {</span>
+      <span class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.<span class="fn">println</span>(<span class="str">"Happy Birthday, "</span> + name + <span class="str">"! 🎉"</span>);</span>
+      <span class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.<span class="fn">println</span>(<span class="str">"You are coded for greatness."</span>);</span>
+      <span class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;}</span>
+      <span class="code-line">&nbsp;&nbsp;}</span>
+      <span class="code-line">}</span>
+    </div>
+    <p class="code-caption">// Output: Happy Birthday, Adeola! 🎉 — You are coded for greatness.</p>
+  </section>
+
+  <!-- Footer -->
+  <footer class="reveal-item" style="transition-delay:0.7s">
+    <div class="confetti-row">🥂 🌹 👑 ✨ 🎂</div>
+    <p class="footer-text">Today & always — Happy Birthday</p>
+  </footer>
+
+</div>
+
+<script>
+  // ─── Generate Stars ───
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 120; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2.5 + 0.5;
+    s.style.cssText = `
+      width:${size}px; height:${size}px;
+      top:${Math.random()*100}%;
+      left:${Math.random()*100}%;
+      --d:${(Math.random()*4+2).toFixed(1)}s;
+      animation-delay:${(Math.random()*4).toFixed(1)}s;
+    `;
+    starsEl.appendChild(s);
+  }
+
+  // ─── Generate Particles ───
+  function spawnParticles() {
+    for (let i = 0; i < 30; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.cssText = `
+        left:${Math.random()*100}%;
+        --d:${(Math.random()*6+4).toFixed(1)}s;
+        animation-delay:${(Math.random()*6).toFixed(1)}s;
+        width:${Math.random()<0.3?6:3}px;
+        height:${Math.random()<0.3?6:3}px;
+        background:${Math.random()<0.5?'#D4AF37':'#c9748a'};
+      `;
+      document.body.appendChild(p);
+    }
+  }
+
+  // ─── Zipper Drag Logic ───
+  const curtainScreen = document.getElementById('curtain-screen');
+  const curtainLeft   = document.getElementById('curtainLeft');
+  const curtainRight  = document.getElementById('curtainRight');
+  const zipperPull    = document.getElementById('zipper-pull');
+  const unzipGap      = document.getElementById('unzip-gap');
+  const hint          = document.getElementById('hint');
+  const arrowIndicator= document.getElementById('arrow-indicator');
+
+  let isDragging = false;
+  let startY = 0;
+  let currentY = 0;
+  let pullTop = 18; // starts at rail
+  const maxDrag = window.innerHeight * 0.75;
+
+  function getClientY(e) {
+    return e.touches ? e.touches[0].clientY : e.clientY;
+  }
+
+  function onStart(e) {
+    isDragging = true;
+    startY = getClientY(e) - currentY;
+    zipperPull.style.cursor = 'grabbing';
+    e.preventDefault();
+  }
+
+  function onMove(e) {
+    if (!isDragging) return;
+    const y = getClientY(e) - startY;
+    currentY = Math.max(0, Math.min(y, maxDrag));
+
+    // move pull
+    zipperPull.style.top = (pullTop + currentY) + 'px';
+
+    // grow gap
+    unzipGap.style.height = currentY + 'px';
+    unzipGap.style.width  = Math.min(currentY / maxDrag * 80 + 6, 86) + 'px';
+    unzipGap.style.background = 'transparent';
+
+    // spread curtains slightly
+    const spread = (currentY / maxDrag) * 15;
+    curtainLeft.style.transform  = `translateX(-${spread}%)`;
+    curtainRight.style.transform = `translateX(${spread}%)`;
+
+    // hide hint early
+    if (currentY > 40) {
+      hint.style.opacity = '0';
+      arrowIndicator.style.opacity = '0';
+    }
+
+    // trigger open at 75%
+    if (currentY >= maxDrag * 0.75) {
+      openCurtains();
+    }
+  }
+
+  function onEnd() {
+    isDragging = false;
+    zipperPull.style.cursor = 'grab';
+    if (currentY < maxDrag * 0.75) {
+      // snap back
+      currentY = 0;
+      zipperPull.style.transition = 'top 0.5s ease';
+      zipperPull.style.top = pullTop + 'px';
+      unzipGap.style.transition = 'height 0.5s ease, width 0.5s ease';
+      unzipGap.style.height = '0';
+      unzipGap.style.width = '6px';
+      curtainLeft.style.transform = '';
+      curtainRight.style.transform = '';
+      hint.style.opacity = '';
+      arrowIndicator.style.opacity = '';
+      setTimeout(() => {
+        zipperPull.style.transition = '';
+        unzipGap.style.transition = '';
+      }, 500);
+    }
+  }
+
+  function openCurtains() {
+    curtainLeft.classList.add('open');
+    curtainRight.classList.add('open');
+    zipperPull.style.opacity = '0';
+
+    setTimeout(() => {
+      curtainScreen.classList.add('hidden');
+      spawnParticles();
+      revealContent();
+    }, 900);
+  }
+
+  function revealContent() {
+    const items = document.querySelectorAll('.reveal-item');
+    items.forEach((el, i) => {
+      setTimeout(() => el.classList.add('visible'), i * 120);
+    });
+  }
+
+  // Events
+  zipperPull.addEventListener('mousedown',  onStart);
+  zipperPull.addEventListener('touchstart', onStart, { passive: false });
+  window.addEventListener('mousemove',  onMove);
+  window.addEventListener('touchmove',  onMove, { passive: false });
+  window.addEventListener('mouseup',   onEnd);
+  window.addEventListener('touchend',  onEnd);
+
+  // Also allow clicking/tapping the curtain to skip (double-tap)
+  let tapCount = 0;
+  curtainScreen.addEventListener('dblclick', openCurtains);
+</script>
+</body>
+</html>
